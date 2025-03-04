@@ -1,12 +1,20 @@
-use std::fs;
-use std::io::ErrorKind;
+mod utils;
+
+use std::sync::Once;
 use assert_cmd::Command;
-use anyhow::{Error, Result};
-use pretty_assertions::assert_eq;
+use anyhow::Result;
+use utils::assert_command;
+
+const CMD: &str = "echo";
+
+fn assert_echo(args: &[&str], expected_file: &str) -> Result<()> {
+    static INIT: Once = Once::new();
+    assert_command(CMD, args, expected_file, &INIT)
+}
 
 #[test]
 fn echo_invalid_option() -> Result<()> {
-    Command::cargo_bin("echo")?
+    Command::cargo_bin(CMD)?
         .arg("-z")
         .assert()
         .failure()
@@ -16,7 +24,7 @@ fn echo_invalid_option() -> Result<()> {
 
 #[test]
 fn echo_no_args() -> Result<()> {
-    Command::cargo_bin("echo")?
+    Command::cargo_bin(CMD)?
         .assert()
         .success()
         .stdout("\n");
@@ -24,18 +32,18 @@ fn echo_no_args() -> Result<()> {
 }
 
 #[test]
-fn echo_1_arg() -> Result<()> {
-    assert_eq_file(&["apple    banana"], "target/tests/expected/echo_1.txt")
+fn echo_fruit_1() -> Result<()> {
+    assert_echo(&["apple    banana"], "fruit_1.txt")
 }
 
 #[test]
-fn echo_2_args() -> Result<()> {
-    assert_eq_file(&["apple", "banana"], "target/tests/expected/echo_2.txt")
+fn echo_fruit_2() -> Result<()> {
+    assert_echo(&["apple", "banana"], "fruit_2.txt")
 }
 
 #[test]
 fn echo_n_no_args() -> Result<()> {
-    Command::cargo_bin("echo")?
+    Command::cargo_bin(CMD)?
         .arg("-n")
         .assert()
         .success()
@@ -44,31 +52,11 @@ fn echo_n_no_args() -> Result<()> {
 }
 
 #[test]
-fn echo_n_1_arg() -> Result<()> {
-    assert_eq_file(&["-n", "apple    banana"], "target/tests/expected/echo_n_1.txt")
+fn echo_n_fruit_1() -> Result<()> {
+    assert_echo(&["-n", "apple    banana"], "fruit_1.n.txt")
 }
 
 #[test]
-fn echo_n_2_args() -> Result<()> {
-    assert_eq_file(&["apple", "banana", "-n"], "target/tests/expected/echo_n_2.txt")
+fn echo_n_fruit_2() -> Result<()> {
+    assert_echo(&["apple", "banana", "-n"], "fruit_2.n.txt")
 }
-
-fn assert_eq_file(args: &[&str], expected_path: &str) -> Result<()> {
-    let expected = match fs::read_to_string(expected_path) {
-        Ok(content) => content,
-        Err(e) => match e.kind() {
-            ErrorKind::NotFound => {
-                Command::new("tests/scripts/echo.sh").assert().success();
-                fs::read_to_string(expected_path)?
-            },
-            _ => return Err(Error::new(e)),
-        }
-    };
-    let output = Command::cargo_bin("echo")?
-        .args(args)
-        .output()?;
-    assert!(output.status.success());
-    assert_eq!(String::from_utf8(output.stdout)?, expected);
-    Ok(())
-}
-

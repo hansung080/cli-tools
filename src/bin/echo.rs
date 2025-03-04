@@ -1,52 +1,13 @@
+use std::env;
 use clap::{Arg, ArgAction, Command, Parser};
 
-enum ClapPattern {
-    #[allow(unused)] Builder,
-    #[allow(unused)] Derive,
-}
-
-// Select the clap pattern.
-const CLAP_PATTERN: ClapPattern = ClapPattern::Derive;
-
 fn main() {
-    match CLAP_PATTERN {
-        ClapPattern::Builder => run_with_clap_builder(),
-        ClapPattern::Derive => run_with_clap_derive(),
-    };
+    run(Args::select());
 }
 
-fn run_with_clap_builder() {
-    let matches = Command::new("echo")
-        .version("0.1.0")
-        .author("Han-Seong Kwon <hansung080@hanmail.net>")
-        .about("Rust version of `echo`")
-        .arg(
-            Arg::new("args")
-                .value_name("ARGS")
-                .help("Arguments to print to the standard output")
-                .required(false)
-                .num_args(1..),
-        )
-        .arg(
-            Arg::new("omit_newline")
-                .short('n')
-                .action(ArgAction::SetTrue)
-                .help("Do not print the trailing newline character"),
-        )
-        .get_matches();
-
-    let args: Vec<String> = match matches.get_many("args") {
-        Some(args) => args.cloned().collect(),
-        None => vec![],
-    };
-    let omit_newline = matches.get_flag("omit_newline");
-
-    print!("{}{}", args.join(" "), if omit_newline { "" } else { "\n" });
-}
-
-#[derive(Debug, Parser)]
-#[command(name = "echo", version, author, about)]
-/// Rust version of `echo`
+#[derive(Parser, Debug)]
+#[command(name = "echo", version = "0.1.0 (clap-derive)", author, about)]
+/// Rust version of `echo` (clap-derive)
 struct Args {
     /// Arguments to print to the standard output
     #[arg(required = false)]
@@ -57,7 +18,44 @@ struct Args {
     omit_newline: bool,
 }
 
-fn run_with_clap_derive() {
-    let args = Args::parse();
+impl Args {
+    fn select() -> Self {
+        if env::var("CLAP_BUILDER").is_ok() {
+            Self::build()
+        } else {
+            Self::parse()
+        }
+    }
+
+    fn build() -> Self {
+        let matches = Command::new("echo")
+            .version("0.1.0 (clap-builder)")
+            .author("Han-Seong Kwon <hansung080@hanmail.net>")
+            .about("Rust version of `echo` (clap-builder)")
+            .arg(
+                Arg::new("args")
+                    .value_name("ARGS")
+                    .help("Arguments to print to the standard output")
+                    .required(false)
+                    .num_args(1..),
+            )
+            .arg(
+                Arg::new("omit_newline")
+                    .short('n')
+                    .action(ArgAction::SetTrue)
+                    .help("Do not print the trailing newline character"),
+            )
+            .get_matches();
+
+        let args: Vec<String> = match matches.get_many("args") {
+            Some(args) => args.cloned().collect(),
+            None => vec![],
+        };
+        let omit_newline = matches.get_flag("omit_newline");
+        Self { args, omit_newline }
+    }
+}
+
+fn run(args: Args) {
     print!("{}{}", args.args.join(" "), if args.omit_newline { "" } else { "\n" });
 }
