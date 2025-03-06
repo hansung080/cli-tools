@@ -42,8 +42,8 @@ impl Args {
             .arg(
                 Arg::new("omit_newline")
                     .short('n')
-                    .action(ArgAction::SetTrue)
-                    .help("Do not print the trailing newline character"),
+                    .help("Do not print the trailing newline character")
+                    .action(ArgAction::SetTrue),
             )
             .get_matches();
 

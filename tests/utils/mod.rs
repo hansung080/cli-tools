@@ -4,8 +4,14 @@ use std::sync::Once;
 use assert_cmd::Command;
 use anyhow::{Error, Result};
 
-pub fn assert_command(cmd: &str, args: &[&str], expected_file: &str, init: &Once) -> Result<()> {
-    let expected_file = format!("target/tests/expected/echo/{expected_file}");
+pub fn assert_command(
+    cmd: &str,
+    args: &[&str],
+    stdin_file: Option<&str>,
+    expected_file: &str,
+    init: &Once
+) -> Result<()> {
+    let expected_file = format!("target/tests/expected/{cmd}/{expected_file}");
     let expected = match fs::read_to_string(&expected_file) {
         Ok(content) => content,
         Err(e) => match e.kind() {
@@ -18,9 +24,22 @@ pub fn assert_command(cmd: &str, args: &[&str], expected_file: &str, init: &Once
             _ => return Err(Error::new(e)),
         }
     };
-    let output = Command::cargo_bin(cmd)?
-        .args(args)
-        .output()?;
+
+    let output = match stdin_file {
+        Some(stdin_file) => {
+            let stdin = fs::read_to_string(stdin_file)?;
+            Command::cargo_bin(cmd)?
+                .args(args)
+                .write_stdin(stdin)
+                .output()?
+        },
+        None => {
+            Command::cargo_bin(cmd)?
+                .args(args)
+                .output()?
+        },
+    };
+
     assert!(output.status.success());
     assert_eq!(String::from_utf8(output.stdout)?, expected);
     Ok(())

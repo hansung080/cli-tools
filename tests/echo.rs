@@ -4,12 +4,13 @@ use std::sync::Once;
 use assert_cmd::Command;
 use anyhow::Result;
 use utils::assert_command;
+use predicates::prelude::*;
 
 const CMD: &str = "echo";
 
 fn assert_echo(args: &[&str], expected_file: &str) -> Result<()> {
     static INIT: Once = Once::new();
-    assert_command(CMD, args, expected_file, &INIT)
+    assert_command(CMD, args, None, expected_file, &INIT)
 }
 
 #[test]
@@ -18,7 +19,7 @@ fn echo_invalid_option() -> Result<()> {
         .arg("-z")
         .assert()
         .failure()
-        .stderr(predicates::str::contains("Usage:"));
+        .stderr(predicate::str::contains("error:"));
     Ok(())
 }
 
@@ -32,31 +33,31 @@ fn echo_no_args() -> Result<()> {
 }
 
 #[test]
-fn echo_fruit_1() -> Result<()> {
-    assert_echo(&["apple    banana"], "fruit_1.txt")
-}
-
-#[test]
-fn echo_fruit_2() -> Result<()> {
-    assert_echo(&["apple", "banana"], "fruit_2.txt")
-}
-
-#[test]
-fn echo_n_no_args() -> Result<()> {
+fn echo_no_args_n() -> Result<()> {
     Command::cargo_bin(CMD)?
         .arg("-n")
         .assert()
         .success()
-        .stdout(predicates::str::is_empty());
+        .stdout(predicate::str::is_empty());
     Ok(())
 }
 
 #[test]
-fn echo_n_fruit_1() -> Result<()> {
-    assert_echo(&["-n", "apple    banana"], "fruit_1.n.txt")
+fn echo_fruit_1() -> Result<()> {
+    assert_echo(&["apple    banana"], "fruit_1.out")
 }
 
 #[test]
-fn echo_n_fruit_2() -> Result<()> {
-    assert_echo(&["apple", "banana", "-n"], "fruit_2.n.txt")
+fn echo_fruit_2() -> Result<()> {
+    assert_echo(&["apple", "banana"], "fruit_2.out")
+}
+
+#[test]
+fn echo_fruit_1_n() -> Result<()> {
+    assert_echo(&["-n", "apple    banana"], "fruit_1.n.out")
+}
+
+#[test]
+fn echo_fruit_2_n() -> Result<()> {
+    assert_echo(&["apple", "banana", "-n"], "fruit_2.n.out")
 }
