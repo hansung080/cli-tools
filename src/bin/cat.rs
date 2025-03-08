@@ -1,8 +1,8 @@
-use std::{env, io, process};
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::{env, process};
+use std::io::BufRead;
 use clap::{Arg, ArgAction, Command, Parser};
 use anyhow::Result;
+use cli_tools::utils;
 
 const CMD: &str = "cat";
 
@@ -29,12 +29,12 @@ struct Args {
     filenames: Vec<String>,
 
     /// Number the output lines, starting at 1
-    #[arg(short = 'n', long = "number", conflicts_with = "non_blank_numbering")]
-    numbering: bool,
+    #[arg(short = 'n', long = "number", conflicts_with = "number_nonblank")]
+    number: bool,
 
     /// Number the non-blank output lines, starting at 1
     #[arg(short = 'b', long = "number-nonblank")]
-    non_blank_numbering: bool,
+    number_nonblank: bool,
 }
 
 impl Args {
@@ -76,8 +76,8 @@ impl Args {
             .get_matches();
         Self {
             filenames: matches.get_many("files").unwrap().cloned().collect(),
-            numbering: matches.get_flag("number"),
-            non_blank_numbering: matches.get_flag("number_nonblank"),
+            number: matches.get_flag("number"),
+            number_nonblank: matches.get_flag("number_nonblank"),
         }
     }
 }
@@ -85,14 +85,14 @@ impl Args {
 fn run(args: Args) -> Result<ExitCode> {
     let mut code = OK;
     for filename in args.filenames {
-        match open(&filename) {
+        match utils::open(&filename) {
             Ok(file) => {
                 let mut nb_num = 0;
                 for (num, line) in file.lines().enumerate() {
                     let line = line?;
-                    if args.numbering {
+                    if args.number {
                         println!("{:6}\t{line}", num + 1);
-                    } else if args.non_blank_numbering {
+                    } else if args.number_nonblank {
                         if line.is_empty() {
                             println!();
                         } else {
@@ -111,11 +111,4 @@ fn run(args: Args) -> Result<ExitCode> {
         }
     }
     Ok(code)
-}
-
-fn open(filename: &str) -> Result<Box<dyn BufRead>> {
-    match filename {
-        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
-        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
-    }
 }

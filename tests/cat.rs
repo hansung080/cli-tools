@@ -7,7 +7,6 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use rand::distr::Alphanumeric;
 use rand::Rng;
-use utils::assert_command;
 
 const CMD: &str = "cat";
 
@@ -15,7 +14,7 @@ const FILE_EMPTY: &str = "tests/input/cat/empty.txt";
 const FILE_FOX: &str = "tests/input/cat/fox.txt";
 const FILE_SPIDERS: &str = "tests/input/cat/spiders.txt";
 const FILE_BUSTLE: &str = "tests/input/cat/the_bustle.txt";
-const FILE_NO_PERMISSION: &str = "tests/input/cat/no_permission.txt";
+const FILE_NO_PERMISSION: &str = "target/tests/input/cat/no_permission.txt";
 
 fn assert_cat(args: &[&str], expected_file: &str) -> Result<()> {
     assert_cat_stdin(args, "", expected_file)
@@ -24,7 +23,7 @@ fn assert_cat(args: &[&str], expected_file: &str) -> Result<()> {
 fn assert_cat_stdin(args: &[&str], stdin_file: &str, expected_file: &str) -> Result<()> {
     static INIT: Once = Once::new();
     let stdin_file = if stdin_file.is_empty() { None } else { Some(stdin_file) };
-    assert_command(CMD, args, stdin_file, expected_file, &INIT)
+    utils::assert_command(CMD, args, stdin_file, expected_file, &INIT)
 }
 
 #[test]
@@ -40,7 +39,7 @@ fn cat_help() -> Result<()> {
 }
 
 #[test]
-fn cat_nb_conflict() -> Result<()> {
+fn cat_conflicted_options_nb() -> Result<()> {
     Command::cargo_bin(CMD)?
         .args(["-n", "-b"])
         .assert()
@@ -76,6 +75,7 @@ fn gen_absent_filename() -> String {
 
 #[test]
 fn cat_no_permission() -> Result<()> {
+    utils::create_file_if_not_exists(FILE_NO_PERMISSION, 0o000, "");
     Command::cargo_bin(CMD)?
         .arg(FILE_NO_PERMISSION)
         .assert()

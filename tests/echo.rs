@@ -3,14 +3,13 @@ mod utils;
 use std::sync::Once;
 use assert_cmd::Command;
 use anyhow::Result;
-use utils::assert_command;
 use predicates::prelude::*;
 
 const CMD: &str = "echo";
 
 fn assert_echo(args: &[&str], expected_file: &str) -> Result<()> {
     static INIT: Once = Once::new();
-    assert_command(CMD, args, None, expected_file, &INIT)
+    utils::assert_command(CMD, args, None, expected_file, &INIT)
 }
 
 #[test]
