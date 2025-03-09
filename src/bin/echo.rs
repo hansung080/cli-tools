@@ -1,5 +1,5 @@
-use std::env;
 use clap::{Arg, ArgAction, Command, Parser};
+use cli_tools::args::{Build, Select};
 
 fn main() {
     run(Args::select());
@@ -10,7 +10,7 @@ fn main() {
 /// Rust version of `echo` (clap-derive)
 struct Args {
     /// Arguments to print to the standard output
-    #[arg(required = false)]
+    #[arg(value_name = "ARGS", required = false)]
     args: Vec<String>,
 
     /// Do not print the trailing newline character
@@ -18,15 +18,7 @@ struct Args {
     omit_newline: bool,
 }
 
-impl Args {
-    fn select() -> Self {
-        if env::var("CLAP_BUILDER").is_ok() {
-            Self::build()
-        } else {
-            Self::parse()
-        }
-    }
-
+impl Build for Args {
     fn build() -> Self {
         let matches = Command::new("echo")
             .version("0.1.0 (clap-builder)")
@@ -55,6 +47,8 @@ impl Args {
         Self { args, omit_newline }
     }
 }
+
+impl Select for Args {}
 
 fn run(args: Args) {
     print!("{}{}", args.args.join(" "), if args.omit_newline { "" } else { "\n" });

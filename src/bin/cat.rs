@@ -1,23 +1,14 @@
-use std::{env, process};
 use std::io::BufRead;
 use clap::{Arg, ArgAction, Command, Parser};
 use anyhow::Result;
+use cli_tools::args::{Build, Select};
+use cli_tools::process::{ExitCode, HandleAndExit};
 use cli_tools::utils;
 
-const CMD: &str = "cat";
-
-type ExitCode = i32;
-
-const OK: ExitCode = 0;
-const ERR_KEEP_RUNNING: ExitCode = 1;
-const ERR_STOP_RUNNING: ExitCode = 2;
+const TAG: &str = "cat";
 
 fn main() {
-    let code = run(Args::select()).unwrap_or_else(|e| {
-        eprintln!("{CMD}: {e}");
-        ERR_STOP_RUNNING
-    });
-    process::exit(code);
+    run(Args::select()).handle_and_exit(TAG);
 }
 
 #[derive(Parser, Debug)]
@@ -37,15 +28,7 @@ struct Args {
     number_nonblank: bool,
 }
 
-impl Args {
-    fn select() -> Self {
-        if env::var("CLAP_BUILDER").is_ok() {
-            Self::build()
-        } else {
-            Self::parse()
-        }
-    }
-
+impl Build for Args {
     fn build() -> Self {
         let matches = Command::new("cat")
             .version("0.1.0 (clap-builder)")
@@ -82,12 +65,14 @@ impl Args {
     }
 }
 
+impl Select for Args {}
+
 fn run(args: Args) -> Result<ExitCode> {
-    let mut code = OK;
+    let mut code = ExitCode::Ok;
     for filename in args.filenames {
         match utils::open(&filename) {
             Ok(file) => {
-                let mut nb_num = 0;
+                let mut num_nb = 0;
                 for (num, line) in file.lines().enumerate() {
                     let line = line?;
                     if args.number {
@@ -96,8 +81,8 @@ fn run(args: Args) -> Result<ExitCode> {
                         if line.is_empty() {
                             println!();
                         } else {
-                            nb_num += 1;
-                            println!("{nb_num:6}\t{line}");
+                            num_nb += 1;
+                            println!("{num_nb:6}\t{line}");
                         }
                     } else {
                         println!("{line}");
@@ -105,8 +90,8 @@ fn run(args: Args) -> Result<ExitCode> {
                 }
             },
             Err(e) => {
-                eprintln!("{CMD}: {filename}: {e}");
-                code = ERR_KEEP_RUNNING;
+                eprintln!("{TAG}: {filename}: {e}");
+                code = ExitCode::ErrKeepRunning;
             },
         }
     }
