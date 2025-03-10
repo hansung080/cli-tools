@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::fs::{self, File, OpenOptions};
 use std::os::unix::fs::OpenOptionsExt;
 use std::io::{ErrorKind, Write};
@@ -6,7 +8,6 @@ use std::sync::Once;
 use assert_cmd::Command;
 use anyhow::{Error, Result};
 
-#[allow(unused)]
 pub fn assert_command(
     cmd: &str,
     args: &[&str],
@@ -48,7 +49,6 @@ pub fn assert_command(
     Ok(())
 }
 
-#[allow(unused)]
 pub fn create_dir_if_not_exists<P: AsRef<Path>>(path: P, recursive: bool) {
     let path = path.as_ref();
     if !path.exists() {
@@ -60,7 +60,6 @@ pub fn create_dir_if_not_exists<P: AsRef<Path>>(path: P, recursive: bool) {
     }
 }
 
-#[allow(unused)]
 pub fn create_file_if_not_exists<P: AsRef<Path>>(path: P, mode: u32, content: &str) -> Option<File> {
     let path = path.as_ref();
     if path.exists() {
