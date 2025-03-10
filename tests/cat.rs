@@ -1,12 +1,10 @@
 mod utils;
 
-use std::fs;
 use std::sync::Once;
 use anyhow::Result;
 use assert_cmd::Command;
 use predicates::prelude::*;
-use rand::distr::Alphanumeric;
-use rand::Rng;
+use utils::consts::FILE_NO_PERMISSION;
 
 const CMD: &str = "cat";
 
@@ -14,7 +12,6 @@ const FILE_EMPTY: &str = "tests/input/cat/empty.txt";
 const FILE_FOX: &str = "tests/input/cat/fox.txt";
 const FILE_SPIDERS: &str = "tests/input/cat/spiders.txt";
 const FILE_BUSTLE: &str = "tests/input/cat/the_bustle.txt";
-const FILE_NO_PERMISSION: &str = "target/tests/input/cat/no_permission.txt";
 
 fn assert_cat(args: &[&str], expected_file: &str) -> Result<()> {
     assert_cat_stdin(args, "", expected_file)
@@ -50,7 +47,7 @@ fn cat_conflicted_options_nb() -> Result<()> {
 
 #[test]
 fn cat_absent_file() -> Result<()> {
-    let filename = gen_absent_filename();
+    let filename = utils::gen_absent_filename();
     Command::cargo_bin(CMD)?
         .arg(&filename)
         .assert()
@@ -59,19 +56,6 @@ fn cat_absent_file() -> Result<()> {
     Ok(())
 }
 
-fn gen_absent_filename() -> String {
-    loop {
-        let filename: String = rand::rng()
-            .sample_iter(&Alphanumeric)
-            .take(7)
-            .map(char::from)
-            .collect();
-
-        if fs::metadata(&filename).is_err() {
-            return filename;
-        }
-    }
-}
 
 #[test]
 fn cat_no_permission() -> Result<()> {

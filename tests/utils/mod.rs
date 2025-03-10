@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+pub mod consts;
+
 use std::fs::{self, File, OpenOptions};
 use std::os::unix::fs::OpenOptionsExt;
 use std::io::{ErrorKind, Write};
@@ -7,6 +9,8 @@ use std::path::Path;
 use std::sync::Once;
 use assert_cmd::Command;
 use anyhow::{Error, Result};
+use rand::distr::Alphanumeric;
+use rand::Rng;
 
 pub fn assert_command(
     cmd: &str,
@@ -47,6 +51,23 @@ pub fn assert_command(
     assert!(output.status.success());
     assert_eq!(String::from_utf8(output.stdout)?, expected);
     Ok(())
+}
+
+pub fn gen_random_string() -> String {
+    rand::rng()
+        .sample_iter(&Alphanumeric)
+        .take(7)
+        .map(char::from)
+        .collect()
+}
+
+pub fn gen_absent_filename() -> String {
+    loop {
+        let filename: String = gen_random_string();
+        if fs::metadata(&filename).is_err() {
+            return filename;
+        }
+    }
 }
 
 pub fn create_dir_if_not_exists<P: AsRef<Path>>(path: P, recursive: bool) {
