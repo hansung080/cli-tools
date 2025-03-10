@@ -91,7 +91,7 @@ fn run(args: Args) -> Result<ExitCode> {
             },
             Err(e) => {
                 eprintln!("{TAG}: {filename}: {e}");
-                code = ExitCode::ErrKeepRunning;
+                code = ExitCode::BasicError;
             },
         }
     }
