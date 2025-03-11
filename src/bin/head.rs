@@ -91,11 +91,21 @@ fn run(args: Args) -> Result<ExitCode> {
                 if n_filenames > 1 {
                     println!("{}==> {filename} <==", if i > 0 { "\n" } else { "" });
                 }
-                if let Some(bytes) = args.bytes {
-                    let mut buf = vec![0; bytes as usize];
+                if let Some(n_bytes) = args.bytes {
+                    // NOTE: Both Read::bytes and Read::read are works O.K. here.
+                    // let bytes: std::result::Result<Vec<_>, _> = file.bytes().take(n_bytes as usize).collect();
+                    // print!("{}", String::from_utf8_lossy(&bytes?));
+
+                    let mut buf = vec![0; n_bytes as usize];
                     let n = file.read(&mut buf)?;
                     print!("{}", String::from_utf8_lossy(&buf[..n]));
                 } else {
+                    // NOTE: BufRead::lines discards the newline characters (Unix: LF (\n), Windows: CRLF (\r\n)) in reading the file.
+                    // for line in file.lines().take(args.lines as usize)  {
+                    //     println!("{}", line?);
+                    // }
+
+                    // NOTE: BufRead::read_line keeps the newline characters (Unix: LF (\n), Windows: CRLF (\r\n)) in reading the file.
                     let mut line = String::new();
                     for _ in 0..args.lines {
                         if file.read_line(&mut line)? == 0 {
