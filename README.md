@@ -5,3 +5,5 @@ Well-known Unix CLI tools written in Rust
 - true
 - false
 - echo
+- cat
+- head

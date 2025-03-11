@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-PROJECT_HOME="$(dirname "$(readlink -f "$0")")/../.."
-IN_DIR="$PROJECT_HOME/tests/input/head"
-OUT_DIR="$PROJECT_HOME/target/tests/expected/head"
+IN_DIR="tests/input/head"
+OUT_DIR="target/tests/expected/head"
 [[ ! -d "$OUT_DIR" ]] && mkdir -p "$OUT_DIR"
 
 EMPTY_FILE="$IN_DIR/empty.txt"
@@ -29,3 +28,12 @@ head -n 4 "${ALL_FILES[@]}" > "$OUT_DIR/all.n4.out"
 head -c 1 "${ALL_FILES[@]}" > "$OUT_DIR/all.c1.out"
 head -c 2 "${ALL_FILES[@]}" > "$OUT_DIR/all.c2.out"
 head -c 4 "${ALL_FILES[@]}" > "$OUT_DIR/all.c4.out"
+
+BASENAME="$(basename "$ONE_FILE")"
+BASENAME="${BASENAME%.*}"
+head < "$ONE_FILE" > "$OUT_DIR/$BASENAME.stdin.out"
+head -n 2 < "$ONE_FILE" > "$OUT_DIR/$BASENAME.stdin.n2.out"
+head -n 4 < "$ONE_FILE" > "$OUT_DIR/$BASENAME.stdin.n4.out"
+head -c 1 < "$ONE_FILE" > "$OUT_DIR/$BASENAME.stdin.c1.out"
+head -c 2 < "$ONE_FILE" > "$OUT_DIR/$BASENAME.stdin.c2.out"
+head -c 4 < "$ONE_FILE" > "$OUT_DIR/$BASENAME.stdin.c4.out"

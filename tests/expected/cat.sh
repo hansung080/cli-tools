@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-set -u
-
-PROJECT_HOME="$(dirname "$(readlink -f "$0")")/../.."
-IN_DIR="$PROJECT_HOME/tests/input/cat"
-OUT_DIR="$PROJECT_HOME/target/tests/expected/cat"
+IN_DIR="tests/input/cat"
+OUT_DIR="target/tests/expected/cat"
 [[ ! -d "$OUT_DIR" ]] && mkdir -p "$OUT_DIR"
 
 EMPTY_FILE="$IN_DIR/empty.txt"

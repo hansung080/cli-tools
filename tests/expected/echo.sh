@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-PROJECT_HOME="$(dirname "$(readlink -f "$0")")/../.."
-OUT_DIR="$PROJECT_HOME/target/tests/expected/echo"
+#set -u
+#PROJECT_HOME="$(dirname "$(readlink -f "$0")")/../.."
+OUT_DIR="target/tests/expected/echo"
 [[ ! -d "$OUT_DIR" ]] && mkdir -p "$OUT_DIR"
 
 echo 'apple    banana' > "$OUT_DIR/fruit_1.out"

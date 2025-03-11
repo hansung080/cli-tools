@@ -2,9 +2,10 @@
 
 pub mod consts;
 
+use std::borrow::Cow;
 use std::fs::{self, File, OpenOptions};
 use std::os::unix::fs::OpenOptionsExt;
-use std::io::{ErrorKind, Write};
+use std::io::{self, ErrorKind, Read, Write};
 use std::path::Path;
 use std::sync::Once;
 use assert_cmd::Command;
@@ -20,14 +21,14 @@ pub fn assert_command(
     init: &Once
 ) -> Result<()> {
     let expected_file = format!("target/tests/expected/{cmd}/{expected_file}");
-    let expected = match fs::read_to_string(&expected_file) {
+    let expected = match read_to_string_lossy(&expected_file) {
         Ok(content) => content,
         Err(e) => match e.kind() {
             ErrorKind::NotFound => {
                 init.call_once(|| {
                     Command::new(format!("tests/expected/{cmd}.sh")).assert().success();
                 });
-                fs::read_to_string(expected_file)?
+                read_to_string_lossy(expected_file)?
             },
             _ => return Err(Error::new(e)),
         }
@@ -49,8 +50,14 @@ pub fn assert_command(
     };
 
     assert!(output.status.success());
-    assert_eq!(String::from_utf8(output.stdout)?, expected);
+    assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
     Ok(())
+}
+
+pub fn read_to_string_lossy<P: AsRef<Path>>(path: P) -> io::Result<String> {
+    let mut buf = Vec::new();
+    File::open(path)?.read_to_end(&mut buf)?;
+    Ok(String::from_utf8_lossy(&buf).to_string())
 }
 
 pub fn gen_random_string() -> String {

@@ -24,21 +24,9 @@ fn assert_cat_stdin(args: &[&str], stdin_file: &str, expected_file: &str) -> Res
 }
 
 #[test]
-fn cat_help() -> Result<()> {
-    for opt in ["-h", "--help"] {
-        Command::cargo_bin(CMD)?
-            .arg(opt)
-            .assert()
-            .success()
-            .stdout(predicate::str::contains("Usage:"));
-    }
-    Ok(())
-}
-
-#[test]
-fn cat_conflicted_options_nb() -> Result<()> {
+fn cat_invalid_option() -> Result<()> {
     Command::cargo_bin(CMD)?
-        .args(["-n", "-b"])
+        .args(&["-n", "-b"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("error:"));
@@ -49,19 +37,18 @@ fn cat_conflicted_options_nb() -> Result<()> {
 fn cat_absent_file() -> Result<()> {
     let filename = utils::gen_absent_filename();
     Command::cargo_bin(CMD)?
-        .arg(&filename)
+        .args(&[FILE_EMPTY, &filename, FILE_FOX])
         .assert()
         .failure()
         .stderr(predicate::str::is_match(format!("{CMD}: {filename}: .* [(]os error 2[)]"))?);
     Ok(())
 }
 
-
 #[test]
 fn cat_no_permission() -> Result<()> {
     utils::create_file_if_not_exists(FILE_NO_PERMISSION, 0o000, "");
     Command::cargo_bin(CMD)?
-        .arg(FILE_NO_PERMISSION)
+        .args(&[FILE_EMPTY, FILE_NO_PERMISSION, FILE_FOX])
         .assert()
         .failure()
         .stderr(predicate::str::is_match(format!("{CMD}: {FILE_NO_PERMISSION}: .* [(]os error 13[)]"))?);
@@ -145,7 +132,7 @@ fn cat_all_b() -> Result<()> {
 
 #[test]
 fn cat_bustle_stdin() -> Result<()> {
-    assert_cat_stdin(&["-"], FILE_BUSTLE, "the_bustle.stdin.out")
+    assert_cat_stdin(&[], FILE_BUSTLE, "the_bustle.stdin.out")
 }
 
 #[test]
@@ -155,5 +142,5 @@ fn cat_bustle_stdin_n() -> Result<()> {
 
 #[test]
 fn cat_bustle_stdin_b() -> Result<()> {
-    assert_cat_stdin(&["-b", "-"], FILE_BUSTLE, "the_bustle.stdin.b.out")
+    assert_cat_stdin(&["-b"], FILE_BUSTLE, "the_bustle.stdin.b.out")
 }

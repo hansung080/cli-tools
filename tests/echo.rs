@@ -13,7 +13,31 @@ fn assert_echo(args: &[&str], expected_file: &str) -> Result<()> {
 }
 
 #[test]
-fn echo_invalid_option() -> Result<()> {
+fn echo_help() -> Result<()> {
+    for arg in &["-h", "--help"] {
+        Command::cargo_bin(CMD)?
+            .arg(arg)
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("Usage:"));
+    }
+    Ok(())
+}
+
+#[test]
+fn echo_version() -> Result<()> {
+    for arg in &["-V", "--version"] {
+        Command::cargo_bin(CMD)?
+            .arg(arg)
+            .assert()
+            .success()
+            .stdout(predicate::str::is_match(format!("{CMD} [0-9]+[.][0-9]+[.][0-9]+.*"))?);
+    }
+    Ok(())
+}
+
+#[test]
+fn echo_unknown_option() -> Result<()> {
     Command::cargo_bin(CMD)?
         .arg("-z")
         .assert()
