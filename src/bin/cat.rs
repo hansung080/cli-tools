@@ -37,24 +37,24 @@ impl Build for Args {
             .arg(
                 Arg::new("files")
                     .value_name("FILES")
-                    .help("Files to read and print to the standard output, a dash (-) or absence represents the standard input")
                     .default_value("-")
-                    .num_args(1..),
+                    .num_args(0..)
+                    .help("Files to read and print to the standard output, a dash (-) or absence represents the standard input"),
             )
             .arg(
                 Arg::new("number")
                     .short('n')
                     .long("number")
-                    .help("Number the output lines, starting at 1")
                     .action(ArgAction::SetTrue)
-                    .conflicts_with("number_nonblank"),
+                    .conflicts_with("number_nonblank")
+                    .help("Number the output lines, starting at 1"),
             )
             .arg(
                 Arg::new("number_nonblank")
                     .short('b')
                     .long("number-nonblank")
-                    .help("Number the non-blank output lines, starting at 1")
-                    .action(ArgAction::SetTrue),
+                    .action(ArgAction::SetTrue)
+                    .help("Number the non-blank output lines, starting at 1"),
             )
             .get_matches();
         Self {

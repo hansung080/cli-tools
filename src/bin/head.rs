@@ -1,5 +1,5 @@
 use std::io::{BufRead, Read};
-use clap::Parser;
+use clap::{Arg, Command, Parser};
 use anyhow::Result;
 use cli_tools::args::{Build, Select};
 use cli_tools::process::{ExitCode, HandleAndExit};
@@ -42,7 +42,41 @@ struct Args {
 
 impl Build for Args {
     fn build() -> Self {
-        todo!()
+        let matches = Command::new("head")
+            .version("0.1.0 (clap-builder)")
+            .author("Han-Seong Kwon <hansung080@hanmail.net>")
+            .about("Rust version of `head` (clap-builder)")
+            .arg(
+                Arg::new("files")
+                    .value_name("FILES")
+                    .default_value("-")
+                    .num_args(0..)
+                    .help("Files to read and print to the standard output, a dash (-) or absence represents the standard input"),
+            )
+            .arg(
+                Arg::new("lines")
+                    .short('n')
+                    .long("lines")
+                    .value_name("LINES")
+                    .default_value("10")
+                    .value_parser(clap::value_parser!(u64).range(1..))
+                    .help("Print lines of each of the specified files"),
+            )
+            .arg(
+                Arg::new("bytes")
+                    .short('c')
+                    .long("bytes")
+                    .value_name("BYTES")
+                    .value_parser(clap::value_parser!(u64).range(1..))
+                    .conflicts_with("lines")
+                    .help("Print bytes of each of the specified files"),
+            )
+            .get_matches();
+        Args {
+            filenames: matches.get_many("files").unwrap().cloned().collect(),
+            lines: matches.get_one("lines").cloned().unwrap(),
+            bytes: matches.get_one("bytes").cloned(),
+        }
     }
 }
 

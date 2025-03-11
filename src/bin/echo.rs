@@ -27,15 +27,15 @@ impl Build for Args {
             .arg(
                 Arg::new("args")
                     .value_name("ARGS")
-                    .help("Arguments to print to the standard output")
                     .required(false)
-                    .num_args(1..),
+                    .num_args(0..)
+                    .help("Arguments to print to the standard output"),
             )
             .arg(
                 Arg::new("omit_newline")
                     .short('n')
-                    .help("Do not print the trailing newline character")
-                    .action(ArgAction::SetTrue),
+                    .action(ArgAction::SetTrue)
+                    .help("Do not print the trailing newline character"),
             )
             .get_matches();
 
