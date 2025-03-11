@@ -2,6 +2,7 @@
 
 #set -u
 #PROJECT_HOME="$(dirname "$(readlink -f "$0")")/../.."
+#OUT_DIR="$PROJECT_HOME/target/tests/expected/echo"
 OUT_DIR="target/tests/expected/echo"
 [[ ! -d "$OUT_DIR" ]] && mkdir -p "$OUT_DIR"
 
