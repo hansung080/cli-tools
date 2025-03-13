@@ -92,7 +92,7 @@ fn run(args: Args) -> Result<ExitCode> {
                     println!("{}==> {filename} <==", if i > 0 { "\n" } else { "" });
                 }
                 if let Some(n_bytes) = args.bytes {
-                    // NOTE: Both Read::bytes and Read::read are works O.K. here.
+                    // NOTE: Both Read::bytes and Read::read work O.K. here.
                     // let bytes: std::result::Result<Vec<_>, _> = file.bytes().take(n_bytes as usize).collect();
                     // print!("{}", String::from_utf8_lossy(&bytes?));
 
