@@ -11,9 +11,9 @@ fn main() {
     run(Args::select()).handle_and_exit(TAG);
 }
 
+/// Rust version of `head` (clap-derive)
 #[derive(Parser, Debug)]
 #[command(name = "head", version = "0.1.0 (clap-derive)", author, about)]
-/// Rust version of `head` (clap-derive)
 struct Args {
     /// Files to read and print to the standard output, a dash (-) or absence represents the standard input
     #[arg(value_name = "FILES", default_value = "-")]

@@ -5,9 +5,9 @@ fn main() {
     run(Args::select());
 }
 
+/// Rust version of `echo` (clap-derive)
 #[derive(Parser, Debug)]
 #[command(name = "echo", version = "0.1.0 (clap-derive)", author, about)]
-/// Rust version of `echo` (clap-derive)
 struct Args {
     /// Arguments to print to the standard output
     #[arg(value_name = "ARGS", required = false)]
